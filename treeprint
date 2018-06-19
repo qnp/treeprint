@@ -1,0 +1,88 @@
+#!/bin/sh
+
+function print_branch() {
+
+  f=$1
+  last=$2
+  num=$3
+
+  children=`find $f -depth 1 | wc -l | bc`
+  out=""
+  branch=$f
+
+  for ((i=2; i<=$num; i++))
+  do
+    branch=`dirname $branch`
+    last_in_branch=`find $(dirname $branch) -maxdepth 1 -print | tail -n 1`
+    if [[ $last_in_branch = $branch ]]
+    then
+      out+=" ☼"
+    else
+      out+=" │"
+    fi
+  done
+
+  out=`echo "$out" | rev`
+
+  if [[ $f = $last ]]
+  then
+    if [[ $children > 0 ]]
+    then
+      out+="└─┬─`basename $f`"
+    else
+      out+="└───`basename $f`"
+    fi
+  else
+    if [[ $children > 0 ]]
+    then
+      out+="├─┬─`basename $f`"
+    else
+      out+="├───`basename $f`"
+    fi
+  fi
+
+  echo $out | sed 's/☼/ /g'
+
+}
+
+function find_deepness() {
+  input=$1
+  res="${input//[^\/]}"
+  echo "${#res}"
+}
+
+current_branch='.'
+
+for f in `find . -print`
+do
+
+  if [[ $f = "." ]]
+  then
+
+    echo "."
+
+  else
+
+    new_branch=`dirname $f`
+    last_in_branch=`find $new_branch -maxdepth 1 -print | tail -n 1`
+
+    if [[ $new_branch == $current_branch ]]
+    then
+
+      # echo $current_branch = $new_branch $f
+      print_branch $f $last_in_branch `find_deepness $f`
+
+    else
+
+      # echo $current_branch ≠ $new_branch $f
+      print_branch $f $last_in_branch `find_deepness $f`
+
+    fi
+
+    current_branch=`dirname $f`
+    # current_branch=`echo $f | sed "s;[^/]*/;;g"`
+    # print_branch $i $num
+
+  fi
+
+done
