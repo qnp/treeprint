@@ -64,7 +64,7 @@ do
   else
 
     new_branch=`dirname $f`
-    last_in_branch=`find $new_branch -maxdepth 1 -print | tail -n 1`
+    last_in_branch=`find "$new_branch" -maxdepth 1 -print | tail -n 1`
 
     if [[ $new_branch == $current_branch ]]
     then
