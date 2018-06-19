@@ -2,19 +2,19 @@
 
 function print_branch() {
 
-  f=$1
-  last=$2
+  f="$1"
+  last="$2"
   num=$3
 
-  children=`find $f -depth 1 | wc -l | bc`
+  children=`find "$f" -depth 1 | wc -l | bc`
   out=""
-  branch=$f
+  branch="$f"
 
   for ((i=2; i<=$num; i++))
   do
-    branch=`dirname $branch`
-    last_in_branch=`find $(dirname $branch) -maxdepth 1 -print | tail -n 1`
-    if [[ $last_in_branch = $branch ]]
+    branch=`dirname "$branch"`
+    last_in_branch=`find $(dirname "$branch") -maxdepth 1 -print | tail -n 1`
+    if [[ "$last_in_branch" = "$branch" ]]
     then
       out+=" ☼"
     else
@@ -24,20 +24,20 @@ function print_branch() {
 
   out=`echo "$out" | rev`
 
-  if [[ $f = $last ]]
+  if [[ "$f" = "$last" ]]
   then
     if [[ $children > 0 ]]
     then
-      out+="└─┬─`basename $f`"
+      out+="└─┬─`basename \"$f\"`"
     else
-      out+="└───`basename $f`"
+      out+="└───`basename \"$f\"`"
     fi
   else
     if [[ $children > 0 ]]
     then
-      out+="├─┬─`basename $f`"
+      out+="├─┬─`basename \"$f\"`"
     else
-      out+="├───`basename $f`"
+      out+="├───`basename \"$f\"`"
     fi
   fi
 
@@ -53,7 +53,9 @@ function find_deepness() {
 
 current_branch='.'
 
-for f in `find . -print`
+
+find . -print0 |
+while IFS= read -r -d '' f
 do
 
   if [[ $f = "." ]]
@@ -63,24 +65,24 @@ do
 
   else
 
-    new_branch=`dirname $f`
+    new_branch=`dirname "$f"`
     last_in_branch=`find "$new_branch" -maxdepth 1 -print | tail -n 1`
 
-    if [[ $new_branch == $current_branch ]]
+    if [[ "$new_branch" == "$current_branch" ]]
     then
 
       # echo $current_branch = $new_branch $f
-      print_branch $f $last_in_branch `find_deepness $f`
+      print_branch "$f" "$last_in_branch" `find_deepness "$f"`
 
     else
 
       # echo $current_branch ≠ $new_branch $f
-      print_branch $f $last_in_branch `find_deepness $f`
+      print_branch "$f" "$last_in_branch" `find_deepness "$f"`
 
     fi
 
-    current_branch=`dirname $f`
-    # current_branch=`echo $f | sed "s;[^/]*/;;g"`
+    current_branch=`dirname "$f"`
+    # current_branch=`echo "$f" | sed "s;[^/]*/;;g"`
     # print_branch $i $num
 
   fi
